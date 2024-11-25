@@ -41,4 +41,22 @@ class HelperTest extends TestCase
             'email' => 'professor@example.com',
         ]);
     }
+
+    public function test_creacio_usuari_associat_a_team()
+    {
+        // Arrange
+        $user = crearUsuariPerDefecte();
+
+        // Act & Assert
+        $this->assertDatabaseHas('teams', [
+            'name' => $user->name . "'s Team",
+            'user_id' => $user->id,
+        ]);
+
+        $this->assertDatabaseHas('team_user', [
+            'team_id' => 1, // ID del team creat
+            'user_id' => $user->id,
+            'role' => 'owner',
+        ]);
+    }
 }
