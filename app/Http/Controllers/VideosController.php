@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\Video;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Team;
+use App\Models\Test;
 
 class VideosController extends Controller
 {
@@ -27,24 +26,26 @@ class VideosController extends Controller
      * Filtra vídeos que han estat testejats per un usuari específic.
      *
      * @param int $userId
-     * @return View
+     * @return \Illuminate\Contracts\View\View
      */
-    public function testedBy(int $userId): View
+    public function testedBy(int $userId)
     {
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Video> $videos */
         $videos = Video::whereHas('tests', function ($query) use ($userId) {
             $query->where('user_id', $userId);
         })->get();
 
         return view('videos.testedBy', compact('videos'));
     }
+
     /**
-     * Relació amb el model Team.
+     * Relació amb el model Test.
      *
-     * @return BelongsTo<Team, TeamInvitation>
+     * @return HasMany<Test>
      */
-    public function team(): BelongsTo
+    public function tests(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->belongsTo(Team::class);
+        return Test::all();
     }
 
 }

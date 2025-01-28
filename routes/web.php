@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\VideosController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -14,4 +15,8 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // Rutes per al VideosController
+    Route::get('/videos/{id}', [VideosController::class, 'show'])->name('videos.show');
+    Route::get('/videos/testedBy/{userId}', [VideosController::class, 'testedBy'])->name('videos.testedBy');
 });

@@ -1,0 +1,14 @@
+includes:
+    - ./vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+        - database/
+        - resources/
+        - routes/
+    level: max
+    ignoreErrors:
+        - '#Missing return type hint on function#'
+    scanFiles:
+        - app/Helpers.php

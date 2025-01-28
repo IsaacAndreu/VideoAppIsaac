@@ -1,0 +1,37 @@
+[90m= [39m[34;4mIlluminate\Database\Eloquent\Collection[39;24m {#5886
+    [34mall[39m: [
+      [34;4mApp\Models\User[39;24m {#6245
+        [34mid[39m: [35m1[39m,
+        [34mname[39m: "[32mUsuari Defecte[39m",
+        [34memail[39m: "[32musuari@example.com[39m",
+        [34memail_verified_at[39m: [36mnull[39m,
+        #[33mpassword[39m: "[32m$2y$12$w26ch3m2qVeVwUHHzQ1SQ.sItombU/AGL9Tx5xWhZg8iMrn5ej01.[39m",
+        #[33mremember_token[39m: [36mnull[39m,
+        [34mcurrent_team_id[39m: [35m1[39m,
+        [34mprofile_photo_path[39m: [36mnull[39m,
+        [34mcreated_at[39m: "[32m2025-01-28 15:37:06[39m",
+        [34mupdated_at[39m: "[32m2025-01-28 15:37:06[39m",
+        [34mtwo_factor_secret[39m: [36mnull[39m,
+        [34mtwo_factor_recovery_codes[39m: [36mnull[39m,
+        [34mtwo_factor_confirmed_at[39m: [36mnull[39m,
+        +[1mprofile_photo_url[22m: [36mnull[39m,
+      },
+      [34;4mApp\Models\User[39;24m {#6510
+        [34mid[39m: [35m2[39m,
+        [34mname[39m: "[32mProfessor Defecte[39m",
+        [34memail[39m: "[32mprofessor@example.com[39m",
+        [34memail_verified_at[39m: [36mnull[39m,
+        #[33mpassword[39m: "[32m$2y$12$1akcLx13/OMwOdqMIO6ycuckhjwLr5Qw1uXwYOIIi/doGPthxpBya[39m",
+        #[33mremember_token[39m: [36mnull[39m,
+        [34mcurrent_team_id[39m: [35m2[39m,
+        [34mprofile_photo_path[39m: [36mnull[39m,
+        [34mcreated_at[39m: "[32m2025-01-28 15:37:06[39m",
+        [34mupdated_at[39m: "[32m2025-01-28 15:37:06[39m",
+        [34mtwo_factor_secret[39m: [36mnull[39m,
+        [34mtwo_factor_recovery_codes[39m: [36mnull[39m,
+        [34mtwo_factor_confirmed_at[39m: [36mnull[39m,
+        +[1mprofile_photo_url[22m: [36mnull[39m,
+      },
+    ],
+  }
+

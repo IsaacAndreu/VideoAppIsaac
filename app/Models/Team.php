@@ -14,15 +14,10 @@ class Team extends JetstreamTeam
     use HasFactory;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'user_id',
-        'personal_team',
-    ];
+    protected $fillable = ['name', 'user_id', 'personal_team'];
+
 
     /**
      * The event map for the model.

@@ -11,7 +11,6 @@ use Laravel\Jetstream\Contracts\AddsTeamMembers;
 use Laravel\Jetstream\Events\AddingTeamMember;
 use Laravel\Jetstream\Events\TeamMemberAdded;
 use Laravel\Jetstream\Jetstream;
-use Laravel\Jetstream\Rules\Role;
 
 class AddTeamMember implements AddsTeamMembers
 {
@@ -53,16 +52,14 @@ class AddTeamMember implements AddsTeamMembers
     /**
      * Get the validation rules for adding a team member.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
+     * @return array<string, mixed>
      */
-    protected function rules(): array
+    public function rules(): array
     {
-        return array_filter([
-            'email' => ['required', 'email', 'exists:users'],
-            'role' => Jetstream::hasRoles()
-                            ? ['required', 'string', new Role]
-                            : null,
-        ]);
+        return [
+            'email' => ['required', 'email', 'max:255', 'exists:users,email'],
+            'role' => ['required', 'string', 'in:' . implode(',', array_keys(Jetstream::$roles))],
+        ];
     }
 
     /**
@@ -71,11 +68,14 @@ class AddTeamMember implements AddsTeamMembers
     protected function ensureUserIsNotAlreadyOnTeam(Team $team, string $email): Closure
     {
         return function ($validator) use ($team, $email) {
-            $validator->errors()->addIf(
-                $team->hasUserWithEmail($email),
-                'email',
-                __('This user already belongs to the team.')
-            );
+            if (is_object($validator) && method_exists($validator, 'errors')) {
+                $errors = $validator->errors();
+                if (is_object($errors) && method_exists($errors, 'add')) {
+                    if ($team->hasUserWithEmail($email)) {
+                        $errors->add('email', __('This user already belongs to the team.'));
+                    }
+                }
+            }
         };
     }
 }
