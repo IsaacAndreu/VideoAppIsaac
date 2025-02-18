@@ -19,4 +19,6 @@ Route::middleware([
     // Rutes per al VideosController
     Route::get('/videos/{id}', [VideosController::class, 'show'])->name('videos.show');
     Route::get('/videos/testedBy/{userId}', [VideosController::class, 'testedBy'])->name('videos.testedBy');
+    Route::get('/videos', [VideosController::class, 'index'])->name('videos.index');
 });
+

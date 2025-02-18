@@ -34,7 +34,7 @@
 
             <!-- Page Content -->
             <main>
-                {{ $slot }}
+                {{ $slot ?? '' }} {{-- Evitem l'error si $slot no està definit --}}
             </main>
         </div>
 

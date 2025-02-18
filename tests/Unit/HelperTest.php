@@ -53,4 +53,15 @@ class HelperTest extends TestCase
             'role' => 'owner',
         ]);
     }
+    public function test_create_default_video()
+    {
+        $video = \App\Helpers\DefaultVideos::crearVideoPerDefecte();
+
+        $this->assertDatabaseHas('videos', [
+            'title' => 'Vídeo per defecte',
+            'url' => 'https://example.com/default-video',
+            'description' => 'Aquest és un vídeo per defecte.',
+        ]);
+    }
+
 }

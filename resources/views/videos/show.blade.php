@@ -14,7 +14,12 @@
             </div>
 
             <div class="mb-6">
-                <a href="{{ $video->url }}" target="_blank" class="text-blue-500 underline">Veure el vídeo</a>
+                <iframe width="560" height="315"
+                        src="{{ str_replace('watch?v=', 'embed/', $video->url) }}"
+                        title="{{ $video->title }}"
+                        frameborder="0"
+                        allowfullscreen>
+                </iframe>
             </div>
 
             @if($video->previous)

@@ -9,17 +9,20 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Test;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasProfilePhoto, HasTeams, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, Notifiable, HasProfilePhoto, HasTeams, TwoFactorAuthenticatable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-    protected $fillable = ['name', 'email', 'password', 'current_team_id'];
+    protected $fillable = ['name', 'email', 'password', 'current_team_id', 'super_admin'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -55,5 +58,25 @@ class User extends Authenticatable
     public function currentTeam()
     {
         return $this->belongsTo(Team::class, 'current_team_id');
+    }
+
+    /**
+     * Retorna els tests que ha fet l'usuari.
+     *
+     * @return HasMany
+     */
+    public function testedBy(): HasMany
+    {
+        return $this->hasMany(Test::class, 'user_id');
+    }
+
+    /**
+     * Comprova si l'usuari és super administrador.
+     *
+     * @return bool
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->super_admin;
     }
 }

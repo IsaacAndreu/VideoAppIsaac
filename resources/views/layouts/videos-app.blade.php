@@ -7,13 +7,21 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
 <body>
-<header>
-    <h1>VideosApp</h1>
+<header class="flex justify-between items-center p-4 bg-gray-800 text-white">
+    <h1 class="text-xl font-bold">VideosApp</h1>
+
+    @can('manage-videos')
+        <a href="{{ route('videos.index') }}" class="bg-blue-500 px-4 py-2 rounded text-white">
+            Gestionar vídeos
+        </a>
+    @endcan
 </header>
-<main>
+
+<main class="p-6">
     {{ $slot }}
 </main>
-<footer>
+
+<footer class="text-center text-gray-600 py-4">
     <p>&copy; {{ date('Y') }} VideosApp. Tots els drets reservats.</p>
 </footer>
 </body>

@@ -27,38 +27,42 @@ class Video extends Model
 
     /**
      * Retorna la data en format "13 de gener de 2025".
+     *
+     * @return string|null
      */
     public function getFormattedPublishedAtAttribute(): ?string
     {
         return $this->published_at
-            ? Carbon::parse($this->published_at)->translatedFormat('d \d\e F \d\e Y')
+            ? $this->published_at->translatedFormat('d \d\e F \d\e Y')
             : null;
     }
 
     /**
      * Retorna la data en format "fa 2 hores".
+     *
+     * @return string|null
      */
     public function getFormattedForHumansPublishedAtAttribute(): ?string
     {
         return $this->published_at
-            ? Carbon::parse($this->published_at)->diffForHumans()
+            ? $this->published_at->diffForHumans()
             : null;
     }
 
     /**
      * Retorna el valor Unix timestamp de published_at.
+     *
+     * @return int|null
      */
     public function getPublishedAtTimestampAttribute(): ?int
     {
-        return $this->published_at
-            ? $this->published_at->timestamp
-            : null;
+        return $this->published_at?->timestamp;
     }
 
     /**
      * Relació amb el model Test.
      *
-     * @return HasMany
+     * @return HasMany<Test>
      */
     public function tests(): HasMany
     {

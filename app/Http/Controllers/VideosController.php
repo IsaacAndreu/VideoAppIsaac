@@ -4,48 +4,49 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use App\Models\Video;
-use App\Models\Test;
+use Illuminate\Support\Facades\Auth;
 
 class VideosController extends Controller
 {
     /**
-     * Mostra un vídeo específic.
+     * Mostra la llista de vídeos (només per usuaris autoritzats).
+     *
+     * @return View|RedirectResponse
+     */
+    public function index(): View|RedirectResponse
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Has d’iniciar sessió per veure els vídeos.');
+        }
+
+        if (!Gate::allows('manage-videos')) {
+            abort(403, 'No tens permisos per gestionar vídeos.');
+        }
+
+        $videos = Video::all();
+        return view('videos.index', compact('videos'));
+    }
+
+    /**
+     * Mostra un vídeo específic (només per usuaris autoritzats).
      *
      * @param int $id
-     * @return View
+     * @return View|RedirectResponse
      */
-    public function show(int $id): View
+    public function show(int $id): View|RedirectResponse
     {
-        $video = Video::findOrFail($id);
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Has d’iniciar sessió per veure el vídeo.');
+        }
 
+        if (!Gate::allows('manage-videos')) {
+            abort(403, 'No tens permisos per veure aquest vídeo.');
+        }
+
+        $video = Video::findOrFail($id);
         return view('videos.show', compact('video'));
     }
-
-    /**
-     * Filtra vídeos que han estat testejats per un usuari específic.
-     *
-     * @param int $userId
-     * @return \Illuminate\Contracts\View\View
-     */
-    public function testedBy(int $userId)
-    {
-        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Video> $videos */
-        $videos = Video::whereHas('tests', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })->get();
-
-        return view('videos.testedBy', compact('videos'));
-    }
-
-    /**
-     * Relació amb el model Test.
-     *
-     * @return HasMany<Test>
-     */
-    public function tests(): \Illuminate\Database\Eloquent\Collection
-    {
-        return Test::all();
-    }
-
 }

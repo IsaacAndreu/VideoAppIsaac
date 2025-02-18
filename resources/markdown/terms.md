@@ -46,4 +46,22 @@ En el segon sprint, el focus va ser millorar la funcionalitat i afegir component
     - Correcció d'errors en la configuració de dates i relacions.
     - Execució de tests per assegurar que totes les funcionalitats treballen com s'esperava.
 
+## **Sprint 3: Implementació de permisos i seguretat**
+En aquest sprint s’ha implementat un sistema de permisos i rols per gestionar correctament l’accés a les funcionalitats de l’aplicació.
+
+1. **Gestió de permisos i rols:**
+    - Instal·lació i configuració del paquet `spatie/laravel-permission`.
+    - Creació dels rols `super-admin`, `regular-user` i `video-manager` amb permisos específics.
+
+2. **Modificacions al sistema d'usuaris:**
+    - Assignació de rols als usuaris per defecte al `DatabaseSeeder`.
+    - Implementació de la funció `isSuperAdmin()` al model `User`.
+
+3. **Proves i validació:**
+    - Creació del test `VideosManageControllerTest` per comprovar l’accés segons permisos.
+    - Execució de `php artisan test` per validar el sistema de seguretat.
+
+4. **Depuració i optimització:**
+    - Correcció d’errors en la gestió de permisos i accés a vídeos.
+    - Neteja de memòria cau i configuracions per evitar conflictes en els tests.
 Gràcies per consultar aquesta guia! Si tens qualsevol dubte, no dubtis a preguntar. 😊
