@@ -55,7 +55,9 @@ class HelperTest extends TestCase
     }
     public function test_create_default_video()
     {
-        $video = \App\Helpers\DefaultVideos::crearVideoPerDefecte();
+        $defaultVideos = new \App\Helpers\DefaultVideos();
+        $video = $defaultVideos->crearVideoPerDefecte();
+
 
         $this->assertDatabaseHas('videos', [
             'title' => 'Vídeo per defecte',

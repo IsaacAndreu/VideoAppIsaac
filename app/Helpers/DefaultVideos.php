@@ -7,7 +7,7 @@ use App\Models\Video;
 class DefaultVideos
 {
     /**
-     * Crear un vídeo per defecte.
+     * Crea un vídeo per defecte.
      *
      * @return Video
      */
@@ -15,32 +15,42 @@ class DefaultVideos
     {
         return Video::create([
             'title' => 'Vídeo per defecte',
-            'url' => 'https://example.com/default-video',
             'description' => 'Aquest és un vídeo per defecte.',
+            'url' => 'https://example.com/default-video',
             'published_at' => now(),
         ]);
     }
 
     /**
-     * Crear un vídeo personalitzat.
+     * Crea tres vídeos per defecte.
      *
-     * @param string $title
-     * @param string $url
-     * @param string $description
-     * @param \DateTimeInterface|null $publishedAt
-     * @return Video
+     * @return void
      */
-    public function crearVideoPersonalitzat(
-        string $title,
-        string $url,
-        string $description,
-        ?\DateTimeInterface $publishedAt = null
-    ): Video {
-        return Video::create([
-            'title' => $title,
-            'url' => $url,
-            'description' => $description,
-            'published_at' => $publishedAt ?? now(),
-        ]);
+    public static function crearVideosPerDefecte(): void
+    {
+        $videos = [
+            [
+                'title' => 'Vídeo 1 per defecte',
+                'description' => 'Descripció del vídeo 1',
+                'url' => 'https://example.com/default-video-1',
+                'published_at' => now(),
+            ],
+            [
+                'title' => 'Vídeo 2 per defecte',
+                'description' => 'Descripció del vídeo 2',
+                'url' => 'https://example.com/default-video-2',
+                'published_at' => now(),
+            ],
+            [
+                'title' => 'Vídeo 3 per defecte',
+                'description' => 'Descripció del vídeo 3',
+                'url' => 'https://example.com/default-video-3',
+                'published_at' => now(),
+            ],
+        ];
+
+        foreach ($videos as $video) {
+            Video::firstOrCreate(['title' => $video['title']], $video);
+        }
     }
 }

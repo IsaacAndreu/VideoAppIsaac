@@ -64,4 +64,74 @@ En aquest sprint s’ha implementat un sistema de permisos i rols per gestionar 
 4. **Depuració i optimització:**
     - Correcció d’errors en la gestió de permisos i accés a vídeos.
     - Neteja de memòria cau i configuracions per evitar conflictes en els tests.
-Gràcies per consultar aquesta guia! Si tens qualsevol dubte, no dubtis a preguntar. 😊
+      Sprint 4: Implementació del CRUD de Vídeos i Gestió Avançada
+      Controladors i Funcions:
+
+# Sprint 4: Implementació del CRUD de Vídeos i Gestió Avançada
+
+## 1. Controladors i Funcions
+
+- **VideosManageController**
+    - S'han creat totes les funcions necessàries per al CRUD:
+        - `index()`: Mostra la llista de vídeos per a gestió (pàgina protegida).
+        - `create()`: Mostra el formulari per crear un nou vídeo.
+        - `store()`: Desa el vídeo nou validant els camps (títol, descripció, URL).
+        - `edit()`: Mostra el formulari per editar un vídeo existent amb dades pre-omplertes.
+        - `update()`: Actualitza el vídeo existent.
+        - `destroy()`: Elimina el vídeo de la base de dades.
+        - `testedBy()`: Mostra els vídeos testejats per un usuari concret.
+- **VideosController@index**
+    - S'ha modificat per mostrar tots els vídeos en una pàgina pública amb un format visual similar a la pàgina principal de YouTube.
+
+## 2. Vídeos per Defecte
+
+- **DefaultVideos Helper**
+    - S'ha actualitzat el helper per crear **3 vídeos per defecte** amb títol, descripció, URL i data de publicació.
+- **DatabaseSeeder**
+    - S'ha modificat per cridar `DefaultVideos::crearVideosPerDefecte()` i assegurar que els vídeos es carreguin correctament juntament amb els usuaris i permisos.
+
+## 3. Vistes per al CRUD
+
+- **Vistes Creats:**
+    - `resources/views/videos/manage/index.blade.php`: Taula amb la llista de vídeos i opcions per editar i eliminar.
+    - `resources/views/videos/manage/create.blade.php`: Formulari per crear un nou vídeo, incloent els atributs `data-qa` en els camps per facilitar els tests.
+    - `resources/views/videos/manage/edit.blade.php`: Formulari per editar un vídeo existent, amb dades pre-omplertes.
+    - `resources/views/videos/manage/delete.blade.php`: Vista de confirmació d'eliminació del vídeo.
+- **Vista Pública:**
+    - `resources/views/videos/index.blade.php`: Mostra tots els vídeos en una disposició de graella amb miniatures incrustades, similar a la pàgina principal de YouTube, amb enllaços per veure el detall de cada vídeo.
+
+## 4. Tests i Validació
+
+- **Tests de VideoTest:**
+    - `user_without_permissions_can_see_default_videos_page`: Comprova que un usuari sense permisos addicionals pot veure la pàgina pública d’índex de vídeos.
+    - `user_with_permissions_can_see_default_videos_page`: Comprova que un usuari amb permisos (video-manager o super-admin) pot veure la pàgina pública.
+    - `not_logged_users_can_see_default_videos_page`: Verifica que els convidats (no autenticats) poden accedir a la pàgina pública.
+- **Tests de VideosManageControllerTest:**
+    - Funcions d'autenticació: `loginAsVideoManager()`, `loginAsSuperAdmin()`, `loginAsRegularUser()`.
+    - Comprovació de permisos per gestionar vídeos:
+        - Accés a la pàgina de creació, emmagatzematge, edició, actualització i eliminació de vídeos.
+        - Verificació que usuaris sense permisos o convidats reben l'error 403 o redirecció adequats.
+
+## 5. Rutes i Middleware
+
+- **Rutes Públiques:**
+    - `/videos`: Pàgina d'índex pública, accessible per a tothom.
+    - `/videos/{id}` i `/videos/testedBy/{userId}`: Accés protegit per `can:view videos`.
+- **Rutes de Gestió (CRUD):**
+    - S'organitzen sota el prefix `manage/videos` i només són accessibles per usuaris autenticats amb el permís `manage videos`.
+    - Inclouen rutes per mostrar, crear, editar, actualitzar i eliminar vídeos.
+
+## 6. Layout – Navbar i Footer
+
+- **Plantilla Principal:**
+    - S'ha creat un layout a `resources/views/layouts/videosapp.blade.php` que inclou un navbar amb enllaços a la pàgina pública d’índex i a la gestió de vídeos (només per usuaris amb permisos).
+    - També s'ha afegit un footer amb informació de copyright.
+    - Aquesta plantilla facilita la navegació entre les diferents seccions de l'aplicació.
+
+## 7. Documentació i Qualitat del Codi
+
+- **Documentació:**
+    - S'ha afegit documentació a `resources/markdown/terms` que descriu les funcionalitats implementades en aquest sprint.
+- **Anàlisi Estàtica:**
+    - S'ha comprovat la qualitat del codi amb Larastan per assegurar que tot compleix amb les millors pràctiques i no hi ha errors.
+ 
