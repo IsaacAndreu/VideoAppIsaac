@@ -41,14 +41,20 @@ class VideosManageController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'url' => 'required|url',
         ]);
 
-        Video::create($request->only('title', 'description', 'url'));
+        Video::create([
+            'title' => $request->input('title'),
+            'description' => $request->input('description'),
+            'url' => $request->input('url'),
+            'user_id' => auth()->id(), // assigna l'id de l'usuari autenticat
+        ]);
 
-        return redirect()->route('videos.manage.index')->with('success', 'Vídeo creat correctament.');
+        return redirect()->route('videos.manage.index')->with('success', 'Vídeo creat correctament!');
     }
+
 
     /**
      * Mostra un vídeo específic.

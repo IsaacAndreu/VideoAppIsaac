@@ -10,14 +10,26 @@
 <!-- Navbar -->
 <header class="flex justify-between items-center p-4 bg-gray-800 text-white">
     <div class="flex items-center space-x-4">
+        <!-- Nom / Logo de l'app -->
         <h1 class="text-xl font-bold">VideosApp</h1>
-        <a href="{{ route('videos.index') }}" class="hover:underline">Inici</a>
+
+        <!-- Enllaç a la pàgina de vídeos -->
+        <a href="{{ route('videos.index') }}" class="hover:underline">Inici Vídeos</a>
+
+        <!-- Enllaç a la pàgina d'usuaris (només si estàs autenticat) -->
         @auth
+            <a href="{{ route('users.index') }}" class="hover:underline">Usuaris</a>
+
             @can('manage videos')
                 <a href="{{ route('videos.manage.index') }}" class="hover:underline">Gestionar Vídeos</a>
             @endcan
+
+            @can('manage users')
+                <a href="{{ route('users.manage.index') }}" class="hover:underline">Gestionar Usuaris</a>
+            @endcan
         @endauth
     </div>
+
     <div>
         @auth
             <span>{{ Auth::user()->name }}</span>
@@ -37,7 +49,7 @@
 
 <!-- Contingut Principal -->
 <main class="p-6">
-    {{ $slot }}
+    @yield('content')
 </main>
 
 <!-- Footer -->

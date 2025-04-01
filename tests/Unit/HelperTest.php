@@ -5,6 +5,8 @@ namespace Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
+use App\Helpers\DefaultVideos;
+use App\Helpers\DefaultUsers;
 
 class HelperTest extends TestCase
 {
@@ -40,7 +42,7 @@ class HelperTest extends TestCase
 
     public function test_creacio_usuari_associat_a_team()
     {
-        $user = crearUsuariPerDefecte();
+        $user = \App\Helpers\DefaultUsers::createRegularUser();
 
         $this->assertDatabaseHas('teams', [
             'name' => $user->name . "'s Team",
@@ -48,22 +50,25 @@ class HelperTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('team_user', [
-            'team_id' => 1, // ID del team creat
             'user_id' => $user->id,
             'role' => 'owner',
         ]);
     }
+
     public function test_create_default_video()
     {
-        $defaultVideos = new \App\Helpers\DefaultVideos();
-        $video = $defaultVideos->crearVideoPerDefecte();
+        // Primer creem un usuari per associar-lo al vídeo
+        $user = DefaultUsers::createVideoManagerUser();
 
+        // Instanciem l'helper i passem l'usuari
+        $defaultVideos = new DefaultVideos();
+        $video = $defaultVideos->crearVideoPerDefecte($user);
 
         $this->assertDatabaseHas('videos', [
             'title' => 'Vídeo per defecte',
             'url' => 'https://example.com/default-video',
             'description' => 'Aquest és un vídeo per defecte.',
+            'user_id' => $user->id,
         ]);
     }
-
 }

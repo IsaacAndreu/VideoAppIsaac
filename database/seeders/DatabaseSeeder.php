@@ -6,8 +6,6 @@ use Illuminate\Database\Seeder;
 use App\Helpers\DefaultUsers;
 use App\Helpers\DefaultVideos;
 use App\Helpers\VideoPermissionsHelper;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,45 +16,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->createPermissions();
+        // 1) Crea permisos i rols per a vídeos i, dins del mateix helper, afegim 'manage users'
+        VideoPermissionsHelper::createAndAssignVideoPermissions();
 
+        // 2) Crea usuaris per defecte
         DefaultUsers::createSuperAdminUser();
         DefaultUsers::createRegularUser();
         DefaultUsers::createVideoManagerUser();
 
+        // 3) Crea vídeos per defecte
         DefaultVideos::crearVideosPerDefecte();
 
-        // Crida al helper per crear i assignar permisos per als vídeos
-        VideoPermissionsHelper::createAndAssignVideoPermissions();
-
         $this->command->info('✅ Usuaris, vídeos i permisos per defecte creats correctament!');
-    }
-
-    /**
-     * Crea permisos i rols utilitzant Spatie Permission.
-     */
-    private function createPermissions(): void
-    {
-        $permissions = [
-            'view videos',
-            'edit videos',
-            'delete videos',
-            'manage videos',
-        ];
-
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
-        }
-
-        $roles = [
-            'super-admin'   => $permissions,
-            'video-manager' => ['view videos', 'edit videos', 'manage videos'],
-            'regular-user'  => ['view videos'],
-        ];
-
-        foreach ($roles as $roleName => $rolePermissions) {
-            $role = Role::firstOrCreate(['name' => $roleName]);
-            $role->syncPermissions($rolePermissions);
-        }
     }
 }

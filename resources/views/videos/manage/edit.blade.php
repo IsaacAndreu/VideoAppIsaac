@@ -1,26 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Vídeo</title>
-</head>
-<body>
-<h1>Editar el vídeo: {{ $video->title }}</h1>
+@extends('layouts.videosapp')
 
-<form action="{{ route('videos.manage.update', $video->id) }}" method="POST">
-    @csrf
-    @method('PUT')
-    <label for="title">Títol:</label>
-    <input type="text" id="title" name="title" value="{{ $video->title }}" required data-qa="video-title"><br>
+@section('title', 'Editar Vídeo')
 
-    <label for="description">Descripció:</label>
-    <textarea id="description" name="description" data-qa="video-description">{{ $video->description }}</textarea><br>
+@section('content')
+    <h1 class="text-2xl font-bold mb-4">Editar el vídeo: {{ $video->title }}</h1>
 
-    <label for="url">URL:</label>
-    <input type="url" id="url" name="url" value="{{ $video->url }}" required data-qa="video-url"><br>
+    <form action="{{ route('videos.manage.update', $video->id) }}" method="POST">
+        @csrf
+        @method('PUT')
+        <div class="mb-4">
+            <label for="title" class="block font-medium">Títol:</label>
+            <input type="text" id="title" name="title" value="{{ $video->title }}" required data-qa="video-title" class="mt-1 block w-full border-gray-300 rounded-md">
+        </div>
 
-    <button type="submit">Actualitzar</button>
-</form>
-</body>
-</html>
+        <div class="mb-4">
+            <label for="description" class="block font-medium">Descripció:</label>
+            <textarea id="description" name="description" required data-qa="video-description" class="mt-1 block w-full border-gray-300 rounded-md">{{ $video->description }}</textarea>
+        </div>
+
+        <div class="mb-4">
+            <label for="url" class="block font-medium">URL:</label>
+            <input type="url" id="url" name="url" value="{{ $video->url }}" required data-qa="video-url" class="mt-1 block w-full border-gray-300 rounded-md">
+        </div>
+
+        <button type="

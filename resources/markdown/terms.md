@@ -134,4 +134,61 @@ En aquest sprint s’ha implementat un sistema de permisos i rols per gestionar 
     - S'ha afegit documentació a `resources/markdown/terms` que descriu les funcionalitats implementades en aquest sprint.
 - **Anàlisi Estàtica:**
     - S'ha comprovat la qualitat del codi amb Larastan per assegurar que tot compleix amb les millors pràctiques i no hi ha errors.
- 
+
+## **Sprint 5: Gestió d’Usuaris i Permisos Avançats**
+
+En aquest sprint s’ha completat la funcionalitat CRUD d’usuaris, afegint un nou controlador dedicat, vistes específiques i un sistema de permisos per controlar qui pot gestionar usuaris. També s’han afegit proves unitàries i d’integració per validar el correcte funcionament.
+
+1. **Controladors i Funcions**
+    - **UsersController**
+        - `index()`: Mostra la llista d’usuaris (restringit a usuaris loguejats).
+        - `show($id)`: Detall d’un usuari concret i els seus vídeos.
+    - **UsersManageController** (CRUD avançat d’usuaris)
+        - `index()`: Mostra la llista d’usuaris per gestionar (requereix el permís `manage users`).
+        - `create()`: Formulari per crear un nou usuari.
+        - `store()`: Desa un usuari nou validant camps (nom, email, contrasenya).
+        - `edit($id)`: Formulari per editar un usuari existent.
+        - `update($id)`: Actualitza les dades de l’usuari (nom, email, contrasenya).
+        - `delete($id)`: Vista de confirmació d’eliminació.
+        - `destroy($id)`: Elimina l’usuari de la base de dades.
+        - `testedBy($id)`: (Opcional) Mostra els tests realitzats per un usuari concret.
+
+2. **CRUD d’Usuaris**
+    - **Vistes**
+        - `users/manage/index.blade.php`: Taula amb la llista d’usuaris i opcions per editar i eliminar.
+        - `users/manage/create.blade.php`: Formulari per crear un usuari nou amb camps `data-qa`.
+        - `users/manage/edit.blade.php`: Formulari per editar un usuari existent.
+        - `users/manage/delete.blade.php`: Vista de confirmació d’eliminació.
+        - `users/index.blade.php`: Llista pública (o restringida a usuaris loguejats) amb opció de cerca per nom o email.
+        - `users/show.blade.php`: Mostra el detall de l’usuari i els seus vídeos associats.
+    - **Permissos**
+        - Només usuaris amb `manage users` poden accedir a `/manage/users` (crear, editar, eliminar).
+        - Resta d’usuaris pot accedir només a `/users` (índex i detall), segons la configuració.
+    - **Rutes i Middleware**
+        - El CRUD d’usuaris es defineix sota el prefix `manage/users`, protegit pel middleware `can:manage users`.
+        - Les rutes d’índex i show d’usuaris requereixen estar loguejat (`auth:sanctum` + `verified`).
+
+3. **Tests i Validació**
+    - **UserTest**
+        - `user_without_permissions_can_see_default_users_page`: Verifica que un usuari sense permisos addicionals pot accedir a la llista d’usuaris.
+        - `user_with_permissions_can_see_default_users_page`: Comprova que un usuari amb `manage users` també hi pot accedir.
+        - `not_logged_users_cannot_see_default_users_page`: Assegura que un convidat no pot veure la llista (o rep redirecció).
+        - `user_without_permissions_can_see_user_show_page`: Un usuari sense perms extra pot veure el detall d’un usuari (si així ho configures).
+        - `user_with_permissions_can_see_user_show_page`: Un usuari amb `manage users` pot veure el detall.
+        - `not_logged_users_cannot_see_user_show_page`: Un convidat rep un 403 o redirecció.
+    - **UsersManageControllerTest**
+        - Inclou funcions de login per cada rol (`loginAsVideoManager()`, `loginAsSuperAdmin()`, `loginAsRegularUser()`).
+        - Proves per verificar que només qui tingui `manage users` pot crear, editar, o eliminar usuaris.
+        - Es comprova que els usuaris sense permís obtenen error 403 i els convidats un redirect a `/login`.
+
+4. **Navbar i Navegació**
+    - S’ha afegit al layout principal (`videosapp.blade.php`) un enllaç **“Gestionar Usuaris”** només visible per a qui tingui `manage users`.
+    - S’han unificat els estils amb Tailwind i les classes utilitzades al dashboard de Jetstream.
+
+5. **Permisos i DatabaseSeeder**
+    - El permís `manage users` s’ha afegit (al helper `VideoPermissionsHelper` o a un helper a part) i s’ha assignat al rol `super-admin`.
+    - El `DatabaseSeeder` executa aquests helpers per assegurar que el rol `super-admin` i el permís `manage users` quedin sincronitzats.
+
+6. **Conclusió**  
+   Amb aquests canvis, el projecte **VideosApp** permet gestionar usuaris de manera totalment integrada, restricció d’accés al CRUD, i visualització pública o privada dels usuaris segons la configuració. Això completa la gestió avançada d’entitats (vídeos i usuaris) i consolida la seguretat via rols i permisos dins de l’aplicació.
+

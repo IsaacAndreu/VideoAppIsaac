@@ -27,8 +27,8 @@ class VideosManageControllerTest extends TestCase
             'edit videos',
             'delete videos',
             'manage users',
-            'create videos', // afegim si es necessita per la creació
-            'manage videos', // pot ser redundant si ja hi ha 'manage videos'
+            'create videos',
+            'manage videos', // redundant però per seguretat
         ];
 
         foreach ($permissions as $permission) {
@@ -68,12 +68,12 @@ class VideosManageControllerTest extends TestCase
         $this->actingAs($user);
     }
 
-    // Ja existents:
+    // Tests ja existents:
     public function test_user_with_permissions_can_manage_videos()
     {
         $this->loginAsVideoManager();
 
-        // Creem 3 vídeos
+        // Creem 3 vídeos (la factory pot no assignar user_id, així que per aquest test només comprovem la visualització)
         $videos = Video::factory()->count(3)->create();
 
         // Accedim a la pàgina pública on es llisten els vídeos
@@ -135,14 +135,18 @@ class VideosManageControllerTest extends TestCase
     public function test_user_with_permissions_can_store_videos()
     {
         $this->loginAsVideoManager();
+        $user = auth()->user();
         $postData = [
             'title' => 'Nou Vídeo de Prova',
             'description' => 'Descripció del nou vídeo',
-            'url' => 'https://example.com/video',
+            'url' => 'https://www.youtube.com/embed/dQw4w9WgXcQ',
         ];
         $response = $this->post(route('videos.manage.store'), $postData);
         $response->assertRedirect(route('videos.manage.index'));
-        $this->assertDatabaseHas('videos', ['title' => 'Nou Vídeo de Prova']);
+        $this->assertDatabaseHas('videos', [
+            'title' => 'Nou Vídeo de Prova',
+            'user_id' => $user->id,
+        ]);
     }
 
     public function test_user_without_permissions_cannot_store_videos()
@@ -151,7 +155,7 @@ class VideosManageControllerTest extends TestCase
         $postData = [
             'title' => 'Nou Vídeo de Prova',
             'description' => 'Descripció del nou vídeo',
-            'url' => 'https://example.com/video',
+            'url' => 'https://www.youtube.com/embed/dQw4w9WgXcQ',
         ];
         $response = $this->post(route('videos.manage.store'), $postData);
         $response->assertStatus(403);
@@ -160,7 +164,9 @@ class VideosManageControllerTest extends TestCase
     public function test_user_with_permissions_can_see_edit_videos()
     {
         $this->loginAsVideoManager();
-        $video = Video::factory()->create();
+        $user = auth()->user();
+        // Creem un vídeo assignant-li el user_id del gestor
+        $video = Video::factory()->create(['user_id' => $user->id]);
         $response = $this->get(route('videos.manage.edit', $video->id));
         $response->assertStatus(200);
         $response->assertSee('Editar'); // comprova algun text de la vista d'edició
@@ -177,7 +183,8 @@ class VideosManageControllerTest extends TestCase
     public function test_user_with_permissions_can_update_videos()
     {
         $this->loginAsVideoManager();
-        $video = Video::factory()->create(['title' => 'Antic Títol']);
+        $user = auth()->user();
+        $video = Video::factory()->create(['title' => 'Antic Títol', 'user_id' => $user->id]);
         $updateData = [
             'title' => 'Títol Actualitzat',
             'description' => $video->description,
@@ -185,7 +192,11 @@ class VideosManageControllerTest extends TestCase
         ];
         $response = $this->put(route('videos.manage.update', $video->id), $updateData);
         $response->assertRedirect(route('videos.manage.index'));
-        $this->assertDatabaseHas('videos', ['title' => 'Títol Actualitzat']);
+        $this->assertDatabaseHas('videos', [
+            'id' => $video->id,
+            'title' => 'Títol Actualitzat',
+            'user_id' => $user->id,
+        ]);
     }
 
     public function test_user_without_permissions_cannot_update_videos()
@@ -204,7 +215,8 @@ class VideosManageControllerTest extends TestCase
     public function test_user_with_permissions_can_destroy_videos()
     {
         $this->loginAsVideoManager();
-        $video = Video::factory()->create();
+        $user = auth()->user();
+        $video = Video::factory()->create(['user_id' => $user->id]);
         $response = $this->delete(route('videos.manage.destroy', $video->id));
         $response->assertRedirect(route('videos.manage.index'));
         $this->assertDatabaseMissing('videos', ['id' => $video->id]);

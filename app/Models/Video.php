@@ -19,6 +19,7 @@ class Video extends Model
         'previous',
         'next',
         'series_id',
+        'user_id'
     ];
 
     protected $casts = [
