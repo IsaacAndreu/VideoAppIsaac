@@ -1,60 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'VideosApp' }}</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ config('app.name', 'Laravel') }}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Styles -->
+    @livewireStyles
 </head>
-<body>
-<!-- Navbar -->
-<header class="flex justify-between items-center p-4 bg-gray-800 text-white">
-    <div class="flex items-center space-x-4">
-        <!-- Nom / Logo de l'app -->
-        <h1 class="text-xl font-bold">VideosApp</h1>
+<body class="font-sans antialiased">
+<x-banner />
 
-        <!-- Enllaç a la pàgina de vídeos -->
-        <a href="{{ route('videos.index') }}" class="hover:underline">Inici Vídeos</a>
+<div class="min-h-screen bg-gray-100">
+    @livewire('navigation-menu')
 
-        <!-- Enllaç a la pàgina d'usuaris (només si estàs autenticat) -->
-        @auth
-            <a href="{{ route('users.index') }}" class="hover:underline">Usuaris</a>
+    <!-- Page Heading -->
+    @if (isset($header))
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                {{ $header }}
+            </div>
+        </header>
+    @endif
 
-            @can('manage videos')
-                <a href="{{ route('videos.manage.index') }}" class="hover:underline">Gestionar Vídeos</a>
-            @endcan
+    <!-- Page Content -->
+    <main>
+        {{ $slot ?? '' }} {{-- Evitem l'error si $slot no està definit --}}
+    </main>
+</div>
 
-            @can('manage users')
-                <a href="{{ route('users.manage.index') }}" class="hover:underline">Gestionar Usuaris</a>
-            @endcan
-        @endauth
-    </div>
+@stack('modals')
 
-    <div>
-        @auth
-            <span>{{ Auth::user()->name }}</span>
-            <a href="{{ route('logout') }}" class="ml-4 hover:underline"
-               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                Tanca Sessió
-            </a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
-                @csrf
-            </form>
-        @else
-            <a href="{{ route('login') }}" class="hover:underline">Inicia Sessió</a>
-            <a href="{{ route('register') }}" class="ml-4 hover:underline">Registra't</a>
-        @endauth
-    </div>
-</header>
-
-<!-- Contingut Principal -->
-<main class="p-6">
-    @yield('content')
-</main>
-
-<!-- Footer -->
-<footer class="text-center text-gray-600 py-4 border-t">
-    <p>&copy; {{ date('Y') }} VideosApp. Tots els drets reservats.</p>
-</footer>
+@livewireScripts
 </body>
 </html>

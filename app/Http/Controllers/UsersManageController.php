@@ -26,12 +26,17 @@ class UsersManageController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'role' => 'required|string',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'string',
         ]);
 
         $user = User::create([
             'name' => $request->input('name'),
             'email' => $request->input('email'),
             'password' => bcrypt($request->input('password')),
+            'role' => $request->input('role'),
+            'permissions' => $request->input('permissions', []), // guardem array buit si no hi ha permisos
         ]);
 
         return redirect()->route('users.manage.index')
@@ -52,12 +57,18 @@ class UsersManageController extends Controller
             'name' => 'required|string|max:255',
             'email' => "required|string|email|max:255|unique:users,email,{$id}",
             'password' => 'nullable|string|min:8',
+            'role' => 'required|string',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'string',
         ]);
 
         $data = [
             'name' => $request->input('name'),
             'email' => $request->input('email'),
+            'role' => $request->input('role'),
+            'permissions' => $request->input('permissions', []),
         ];
+
         if ($request->filled('password')) {
             $data['password'] = bcrypt($request->input('password'));
         }
@@ -87,7 +98,6 @@ class UsersManageController extends Controller
     public function testedBy(int $id): View
     {
         $user = User::findOrFail($id);
-        // suposant que tinguis un model Test amb camp user_id
         $tests = $user->testedBy;
         return view('users.manage.testedby', compact('user', 'tests'));
     }

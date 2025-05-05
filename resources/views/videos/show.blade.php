@@ -1,4 +1,4 @@
-<x-videos-app-layout>
+<x-app-layout>
     <x-slot:title>
         {{ $video->title }}
     </x-slot:title>
@@ -35,4 +35,4 @@
             @endif
         </article>
     </div>
-</x-videos-app-layout>
+</x-app-layout>

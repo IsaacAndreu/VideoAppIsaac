@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Team;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use App\Helpers\VideoPermissionsHelper;
 
 class DefaultUsers
 {
@@ -25,6 +26,11 @@ class DefaultUsers
         ]);
 
         self::createTeamForUser($user);
+
+        // 🔥 Crear permisos i assignar-los al rol super-admin
+        VideoPermissionsHelper::createAndAssignVideoPermissions();
+
+        // Assegurar que el rol superadmin existeix i assignar-lo
         $user->assignRole('super-admin');
 
         return $user;
@@ -46,6 +52,11 @@ class DefaultUsers
         ]);
 
         self::createTeamForUser($user);
+
+        if (!Role::where('name', 'regular-user')->exists()) {
+            Role::create(['name' => 'regular-user']);
+        }
+
         $user->assignRole('regular-user');
 
         return $user;
@@ -67,6 +78,11 @@ class DefaultUsers
         ]);
 
         self::createTeamForUser($user);
+
+        if (!Role::where('name', 'video-manager')->exists()) {
+            Role::create(['name' => 'video-manager']);
+        }
+
         $user->assignRole('video-manager');
 
         return $user;
@@ -74,6 +90,9 @@ class DefaultUsers
 
     /**
      * Crea un Team personal per a l'usuari.
+     *
+     * @param User $user
+     * @return void
      */
     private static function createTeamForUser(User $user): void
     {
@@ -86,5 +105,10 @@ class DefaultUsers
 
         $user->ownedTeams()->save($team);
         $user->switchTeam($team);
+
+        // 🔥 Evita duplicats: només afegeix si no hi és
+        if (!$team->users->contains($user->id)) {
+            $team->users()->attach($user->id, ['role' => 'owner']);
+        }
     }
 }

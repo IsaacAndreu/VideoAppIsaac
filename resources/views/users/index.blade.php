@@ -1,8 +1,4 @@
-@extends('layouts.videosapp')
-
-@section('title', 'Llista d\'Usuaris')
-
-@section('content')
+<x-app-layout>
     <h1 class="text-2xl font-bold mb-4">Llista d'Usuaris</h1>
 
     <!-- Formulari de cerca -->
@@ -54,4 +50,4 @@
         @endforelse
         </tbody>
     </table>
-@endsection
+</x-app-layout>

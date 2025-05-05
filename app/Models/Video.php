@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
 
 class Video extends Model
@@ -27,15 +28,27 @@ class Video extends Model
     ];
 
     /**
+     * Relació: cada vídeo pertany a una sèrie.
+     *
+     * @return BelongsTo
+     */
+    public function serie(): BelongsTo
+    {
+        return $this->belongsTo(Serie::class);
+    }
+
+    /**
      * Retorna la data en format "13 de gener de 2025".
      *
      * @return string|null
      */
     public function getFormattedPublishedAtAttribute(): ?string
     {
-        return $this->published_at
-            ? $this->published_at->translatedFormat('d \d\e F \d\e Y')
-            : null;
+        if (!$this->published_at) {
+            return null;
+        }
+
+        return str_replace(' de de ', ' de ', $this->published_at->translatedFormat('d \d\e F \d\e Y'));
     }
 
     /**

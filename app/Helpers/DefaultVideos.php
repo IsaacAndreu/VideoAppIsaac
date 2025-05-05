@@ -18,7 +18,7 @@ class DefaultVideos
         return Video::create([
             'title' => 'Vídeo per defecte',
             'description' => 'Aquest és un vídeo per defecte.',
-            'url' => 'https://www.youtube.com/watch?v=bvf2GPDtPSg',
+            'url' => 'https://example.com/default-video', // ✅ Canviat a l'URL correcte
             'published_at' => now(),
             'user_id' => $user->id,
         ]);
@@ -31,7 +31,7 @@ class DefaultVideos
      */
     public static function crearVideosPerDefecte(): void
     {
-        $defaultUser = \App\Models\User::find(1); // o busca pel correu si vols assegurar-te
+        $defaultUser = \App\Models\User::find(1);
         if (!$defaultUser) return;
 
         $videos = [

@@ -1,17 +1,30 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
+use Illuminate\Routing\Controller; // 🔥 Aquesta és la clau!!
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Video;
+use App\Models\Serie;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-
 class VideosController extends Controller
 {
+    /**
+     * VideosController constructor.
+     * Aplicar middleware d'autenticació per a operacions CRUD.
+     */
+    public function __construct()
+    {
+        $this->middleware('auth')->only([
+            'create', 'store', 'edit', 'update', 'destroy', 'manageIndex'
+        ]);
+    }
+
     /**
      * Mostra la llista de vídeos (accessible per a tothom).
      *
@@ -50,7 +63,8 @@ class VideosController extends Controller
      */
     public function create(): View
     {
-        return view('videos.manage.create');
+        $series = Serie::all();
+        return view('videos.manage.create', compact('series'));
     }
 
     /**
@@ -65,12 +79,15 @@ class VideosController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'url' => 'required|url',
+            'series_id' => 'nullable|exists:series,id',
         ]);
 
         Video::create([
             'title' => $request->input('title'),
             'description' => $request->input('description'),
             'url' => $request->input('url'),
+            'series_id' => $request->input('series_id'),
+            'user_id' => Auth::id(), // Assignar automàticament l'usuari que crea el vídeo
         ]);
 
         return redirect()->route('videos.manage.index')->with('success', 'Vídeo creat correctament!');
@@ -85,7 +102,8 @@ class VideosController extends Controller
     public function edit(int $id): View
     {
         $video = Video::findOrFail($id);
-        return view('videos.manage.edit', compact('video'));
+        $series = Serie::all();
+        return view('videos.manage.edit', compact('video', 'series'));
     }
 
     /**
@@ -101,6 +119,7 @@ class VideosController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'url' => 'required|url',
+            'series_id' => 'nullable|exists:series,id',
         ]);
 
         $video = Video::findOrFail($id);
@@ -108,6 +127,7 @@ class VideosController extends Controller
             'title' => $request->input('title'),
             'description' => $request->input('description'),
             'url' => $request->input('url'),
+            'series_id' => $request->input('series_id'),
         ]);
 
         return redirect()->route('videos.manage.index')->with('success', 'Vídeo actualitzat correctament!');
@@ -128,7 +148,7 @@ class VideosController extends Controller
     }
 
     /**
-     * Mostra la pàgina de gestió de vídeos (per a usuaris amb permisos específics).
+     * Mostra la pàgina de gestió de vídeos (per a usuaris autenticats).
      *
      * @return View
      */
