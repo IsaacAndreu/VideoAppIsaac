@@ -10,16 +10,14 @@ use Illuminate\Support\Str;
 use Laravel\Jetstream\Features;
 
 /**
- * @extends Factory<User>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
  */
 class UserFactory extends Factory
 {
     /**
      * The current password being used by the factory.
-     *
-     * @var string|null
      */
-    protected static ?string $password = null;
+    protected static ?string $password;
 
     /**
      * Define the model's default state.
@@ -29,10 +27,10 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
-            'email' => $this->faker->unique()->safeEmail(),
+            'name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'), // Crea un hash només una vegada
+            'password' => static::$password ??= Hash::make('password'),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'remember_token' => Str::random(10),
@@ -43,8 +41,6 @@ class UserFactory extends Factory
 
     /**
      * Indicate that the model's email address should be unverified.
-     *
-     * @return $this
      */
     public function unverified(): static
     {
@@ -55,20 +51,17 @@ class UserFactory extends Factory
 
     /**
      * Indicate that the user should have a personal team.
-     *
-     * @param callable|null $callback
-     * @return $this
      */
     public function withPersonalTeam(?callable $callback = null): static
     {
-        if (!Features::hasTeamFeatures()) {
+        if (! Features::hasTeamFeatures()) {
             return $this->state([]);
         }
 
         return $this->has(
             Team::factory()
                 ->state(fn (array $attributes, User $user) => [
-                    'name' => "{$user->name}'s Team",
+                    'name' => $user->name.'\'s Team',
                     'user_id' => $user->id,
                     'personal_team' => true,
                 ])

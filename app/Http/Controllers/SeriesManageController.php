@@ -3,24 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Models\Serie;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 
 class SeriesManageController extends Controller
 {
+    public function __construct()
+    {
+        // Requereix estar autenticat per a totes les rutes
+        $this->middleware('auth');
+
+        // Permisos segons la política SeriesPolicy
+        $this->middleware('can:viewAny,App\Models\Serie')->only('index');
+        $this->middleware('can:create,App\Models\Serie')->only(['create', 'store']);
+        $this->middleware('can:view,serie')->only('show');
+        $this->middleware('can:update,serie')->only(['edit', 'update']);
+        $this->middleware('can:delete,serie')->only(['delete', 'destroy']);
+    }
+
     /**
      * Mostrar totes les sèries.
      */
     public function index(): View
     {
         $series = Serie::paginate(10);
+
         return view('series.manage.index', compact('series'));
     }
 
     /**
-     * Mostra el formulari per crear una nova sèrie.
+     * Formulari per crear una nova sèrie.
      */
     public function create(): View
     {
@@ -32,89 +45,90 @@ class SeriesManageController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'image' => 'nullable|string|max:255',
-            'user_name' => 'required|string|max:255',
-            'user_photo_url' => 'nullable|string|max:255',
+        $data = $request->validate([
+            'title'        => 'required|string|max:255',
+            'description'  => 'required|string',
+            'image'        => 'nullable|string|max:255',
             'published_at' => 'nullable|date',
         ]);
 
-        Serie::create($request->only([
-            'title', 'description', 'image', 'user_name', 'user_photo_url', 'published_at'
-        ]));
+        // Guarda qui la crea
+        $data['user_id'] = auth()->id();
 
-        return redirect()->route('series.manage.index')->with('success', 'Sèrie creada correctament!');
+        Serie::create($data);
+
+        return redirect()
+            ->route('series.manage.index')
+            ->with('success', 'Sèrie creada correctament!');
+    }
+
+    /**
+     * Mostra el detall d’una sèrie.
+     */
+    public function show(Serie $serie): View
+    {
+        $serie->load('videos');
+
+        return view('series.manage.show', compact('serie'));
     }
 
     /**
      * Formulari per editar una sèrie.
      */
-    public function edit(int $id): View
+    public function edit(Serie $serie): View
     {
-        $serie = Serie::findOrFail($id);
         return view('series.manage.edit', compact('serie'));
     }
 
     /**
      * Actualitza una sèrie existent.
      */
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(Request $request, Serie $serie): RedirectResponse
     {
-        $serie = Serie::findOrFail($id);
-
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'image' => 'nullable|string|max:255',
-            'user_name' => 'required|string|max:255',
-            'user_photo_url' => 'nullable|string|max:255',
+        $data = $request->validate([
+            'title'        => 'required|string|max:255',
+            'description'  => 'required|string',
+            'image'        => 'nullable|string|max:255',
             'published_at' => 'nullable|date',
         ]);
 
-        $serie->update($request->only([
-            'title', 'description', 'image', 'user_name', 'user_photo_url', 'published_at'
-        ]));
+        $serie->update($data);
 
-        return redirect()->route('series.manage.index')->with('success', 'Sèrie actualitzada correctament!');
+        return redirect()
+            ->route('series.manage.index')
+            ->with('success', 'Sèrie actualitzada correctament!');
     }
 
     /**
-     * Formulari per confirmar l'eliminació d'una sèrie.
+     * Formulari per confirmar l’eliminació d’una sèrie.
      */
-    public function delete(int $id): View
+    public function delete(Serie $serie): View
     {
-        $serie = Serie::findOrFail($id);
         return view('series.manage.delete', compact('serie'));
     }
 
     /**
      * Elimina una sèrie.
      */
-    public function destroy(int $id): RedirectResponse
+    public function destroy(Serie $serie): RedirectResponse
     {
-        $serie = Serie::findOrFail($id);
-
         // Opcional: desassignar vídeos relacionats
-        foreach ($serie->videos as $video) {
-            $video->series_id = null;
-            $video->save();
-        }
+        $serie->videos()->update(['series_id' => null]);
 
         $serie->delete();
 
-        return redirect()->route('series.manage.index')->with('success', 'Sèrie eliminada correctament!');
+        return redirect()
+            ->route('series.manage.index')
+            ->with('success', 'Sèrie eliminada correctament!');
     }
 
     /**
-     * Mostrar totes les sèries testejades per un usuari.
+     * Mostrar totes les sèries creades per un usuari (tested by).
      */
     public function testedby(int $userId): View
     {
-        $user = User::findOrFail($userId);
-        $series = Serie::where('user_name', $user->name)->get();
+        $series = Serie::where('user_id', $userId)->get();
 
-        return view('series.manage.testedby', compact('user', 'series'));
+        return view('series.manage.testedby', compact('series'));
     }
 }

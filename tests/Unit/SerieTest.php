@@ -11,13 +11,33 @@ class SerieTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_serie_have_videos()
+    /** @test */
+    public function serie_has_many_videos()
     {
         $serie = Serie::factory()->create();
-        $video = Video::factory()->create([
-            'series_id' => $serie->id,
+        $videos = Video::factory()->count(2)->create([
+            'serie_id' => $serie->id,
         ]);
 
-        $this->assertTrue($serie->videos->contains($video));
+        $this->assertCount(2, $serie->videos);
+        $this->assertTrue($serie->videos->contains($videos->first()));
+    }
+
+    /** @test */
+    public function it_has_expected_fillable_properties()
+    {
+        $serie = new Serie();
+
+        $this->assertEquals(
+            ['title', 'description', 'image', 'user_name', 'user_photo_url', 'published_at'],
+            $serie->getFillable()
+        );
+    }
+
+    /** @test */
+    public function title_and_description_are_required()
+    {
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        Serie::create([]);
     }
 }

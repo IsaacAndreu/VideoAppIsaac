@@ -1,34 +1,33 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
-use Illuminate\Routing\Controller; // 🔥 Aquesta és la clau!!
+use App\Models\Video;
+use App\Models\Serie;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
-use App\Models\Video;
-use App\Models\Serie;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+
 class VideosController extends Controller
 {
-    /**
-     * VideosController constructor.
-     * Aplicar middleware d'autenticació per a operacions CRUD.
-     */
     public function __construct()
     {
+        // Només usuaris autenticats poden accedir a les rutes de gestió
         $this->middleware('auth')->only([
+            'create', 'store', 'edit', 'update', 'destroy', 'manageIndex'
+        ]);
+
+        // Permís per veure un vídeo concret
+        $this->middleware('can:view videos')->only('show');
+
+        // Permís per a qualsevol operació de gestió de vídeos
+        $this->middleware('can:manage videos')->only([
             'create', 'store', 'edit', 'update', 'destroy', 'manageIndex'
         ]);
     }
 
     /**
-     * Mostra la llista de vídeos (accessible per a tothom).
-     *
-     * @return View
+     * Llista pública de vídeos.
      */
     public function index(): View
     {
@@ -37,29 +36,15 @@ class VideosController extends Controller
     }
 
     /**
-     * Mostra un vídeo específic (només per usuaris autoritzats).
-     *
-     * @param int $id
-     * @return View|RedirectResponse
+     * Mostra un vídeo específic (requereix permís).
      */
-    public function show(int $id): View|RedirectResponse
+    public function show(Video $video): View
     {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Has d’iniciar sessió per veure el vídeo.');
-        }
-
-        if (!Gate::allows('view videos')) {
-            abort(403, 'No tens permisos per veure aquest vídeo.');
-        }
-
-        $video = Video::findOrFail($id);
         return view('videos.show', compact('video'));
     }
 
     /**
-     * Mostra el formulari per crear un vídeo nou.
-     *
-     * @return View
+     * Formulari per crear un vídeo.
      */
     public function create(): View
     {
@@ -68,89 +53,66 @@ class VideosController extends Controller
     }
 
     /**
-     * Desa un vídeo nou a la base de dades.
-     *
-     * @param Request $request
-     * @return RedirectResponse
+     * Desa un nou vídeo.
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
+        $data = $request->validate([
+            'title'       => 'required|string|max:255',
             'description' => 'required|string',
-            'url' => 'required|url',
-            'series_id' => 'nullable|exists:series,id',
+            'url'         => 'required|url',
+            'series_id'   => 'nullable|exists:series,id',
         ]);
 
         Video::create([
-            'title' => $request->input('title'),
-            'description' => $request->input('description'),
-            'url' => $request->input('url'),
-            'series_id' => $request->input('series_id'),
-            'user_id' => Auth::id(), // Assignar automàticament l'usuari que crea el vídeo
+            ...$data,
+            'user_id' => auth()->id(),
         ]);
 
-        return redirect()->route('videos.manage.index')->with('success', 'Vídeo creat correctament!');
+        return redirect()->route('videos.manage.index')
+            ->with('success', 'Vídeo creat correctament!');
     }
 
     /**
-     * Mostra el formulari per editar un vídeo existent.
-     *
-     * @param int $id
-     * @return View
+     * Formulari per editar un vídeo.
      */
-    public function edit(int $id): View
+    public function edit(Video $video): View
     {
-        $video = Video::findOrFail($id);
         $series = Serie::all();
         return view('videos.manage.edit', compact('video', 'series'));
     }
 
     /**
-     * Actualitza un vídeo existent a la base de dades.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return RedirectResponse
+     * Actualitza un vídeo existent.
      */
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(Request $request, Video $video): RedirectResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
+        $data = $request->validate([
+            'title'       => 'required|string|max:255',
             'description' => 'required|string',
-            'url' => 'required|url',
-            'series_id' => 'nullable|exists:series,id',
+            'url'         => 'required|url',
+            'series_id'   => 'nullable|exists:series,id',
         ]);
 
-        $video = Video::findOrFail($id);
-        $video->update([
-            'title' => $request->input('title'),
-            'description' => $request->input('description'),
-            'url' => $request->input('url'),
-            'series_id' => $request->input('series_id'),
-        ]);
+        $video->update($data);
 
-        return redirect()->route('videos.manage.index')->with('success', 'Vídeo actualitzat correctament!');
+        return redirect()->route('videos.manage.index')
+            ->with('success', 'Vídeo actualitzat correctament!');
     }
 
     /**
-     * Elimina un vídeo de la base de dades.
-     *
-     * @param int $id
-     * @return RedirectResponse
+     * Elimina un vídeo.
      */
-    public function destroy(int $id): RedirectResponse
+    public function destroy(Video $video): RedirectResponse
     {
-        $video = Video::findOrFail($id);
         $video->delete();
 
-        return redirect()->route('videos.manage.index')->with('success', 'Vídeo eliminat correctament!');
+        return redirect()->route('videos.manage.index')
+            ->with('success', 'Vídeo eliminat correctament!');
     }
 
     /**
-     * Mostra la pàgina de gestió de vídeos (per a usuaris autenticats).
-     *
-     * @return View
+     * Llista de gestió de vídeos (privat).
      */
     public function manageIndex(): View
     {
@@ -159,17 +121,11 @@ class VideosController extends Controller
     }
 
     /**
-     * Mostra els vídeos testejats per un usuari específic.
-     *
-     * @param int $userId
-     * @return View
+     * Mostra els vídeos testejats per un usuari.
      */
     public function testedBy(int $userId): View
     {
-        $videos = Video::whereHas('testedBy', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })->get();
-
+        $videos = Video::where('tested_by', $userId)->get();
         return view('videos.testedBy', compact('videos'));
     }
 }

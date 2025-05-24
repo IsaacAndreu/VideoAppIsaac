@@ -1,50 +1,67 @@
-<x-app-layout>
+{{-- resources/views/series/index.blade.php --}}
+<x-videos-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            Totes les Sèries
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold text-gray-800">
+                Totes les Sèries
+            </h2>
+
+            @can('create', App\Models\Serie::class)
+                <a href="{{ route('series.manage.create') }}">
+                    <x-button color="primary" class="inline-flex items-center space-x-2">
+                        <span>➕</span>
+                        <span>Nova Sèrie</span>
+                    </x-button>
+                </a>
+            @endcan
+        </div>
     </x-slot>
 
-    <div class="py-4 px-6">
-        <!-- Formulari de cerca -->
-        <form method="GET" action="{{ route('series.index') }}" class="mb-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {{-- Formulari de cerca --}}
+        <form method="GET" action="{{ route('series.index') }}" class="mb-6 flex flex-col sm:flex-row gap-2">
             <input
                 type="text"
                 name="search"
-                placeholder="Cerca una sèrie..."
+                placeholder="Cerca una sèrie…"
                 value="{{ request('search') }}"
-                class="w-full md:w-1/3 border-gray-300 rounded-md p-2"
-                data-qa="search-series"
+                class="w-full sm:w-1/3 border-gray-300 rounded-md px-3 py-2 text-base"
+            />
+
+            {{-- Botó manual per garantir text + icona --}}
+            <button
+                type="submit"
+                class="inline-flex items-center space-x-2 px-4 py-2 border border-transparent rounded-md font-semibold
+                       bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 text-white"
             >
+                <span>🔍</span>
+                <span>Buscar</span>
+            </button>
         </form>
 
-        <!-- Llistat de sèries -->
+        {{-- Llistat de sèries --}}
         @if ($series->isEmpty())
             <p class="text-gray-600">No hi ha sèries disponibles.</p>
         @else
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($series as $serie)
-                    <div class="border rounded-lg shadow-md p-4 bg-white hover:shadow-lg transition">
-                        @if ($serie->image)
-                            <img src="{{ $serie->image }}" alt="{{ $serie->title }}" class="w-full h-40 object-cover mb-2 rounded">
-                        @else
-                            <div class="w-full h-40 bg-gray-200 mb-2 rounded"></div>
-                        @endif
-
-                        <h3 class="text-lg font-semibold mb-2">{{ $serie->title }}</h3>
-                        <p class="text-gray-600 mb-4">{{ Str::limit($serie->description, 80) }}</p>
-
-                        <a href="{{ route('series.show', $serie->id) }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" data-qa="view-series-{{ $serie->id }}">
-                            Veure detalls
-                        </a>
-                    </div>
+                    <x-card-image :image="Storage::url($serie->image)" :title="$serie->title">
+                        <p>{{ \Illuminate\Support\Str::limit($serie->description, 80) }}</p>
+                        <x-slot name="footer">
+                            <a href="{{ route('series.show', $serie) }}">
+                                <x-button color="primary" class="inline-flex items-center space-x-2">
+                                    <span>👁️</span>
+                                    <span>Veure</span>
+                                </x-button>
+                            </a>
+                        </x-slot>
+                    </x-card-image>
                 @endforeach
             </div>
 
-            <!-- Paginació -->
             <div class="mt-6">
                 {{ $series->links() }}
             </div>
         @endif
     </div>
-</x-app-layout>
+</x-videos-app-layout>

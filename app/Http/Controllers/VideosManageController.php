@@ -2,138 +2,101 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Gate;
+use App\Events\VideoCreated;
 use App\Models\Video;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class VideosManageController extends Controller
 {
-    /**
-     * Mostra la llista de vídeos per gestionar-los.
-     *
-     * @return View
-     */
+    public function __construct()
+    {
+        $this->middleware('can:viewAny,App\Models\Video')->only('index');
+        $this->middleware('can:create,App\Models\Video')->only(['create', 'store']);
+        $this->middleware('can:view,video')->only('show');
+        $this->middleware('can:update,video')->only(['edit', 'update']);
+        $this->middleware('can:delete,video')->only(['delete', 'destroy']);
+    }
+
     public function index(): View
     {
         $videos = Video::all();
         return view('videos.manage.index', compact('videos'));
     }
 
-    /**
-     * Mostra el formulari per crear un nou vídeo.
-     *
-     * @return View
-     */
     public function create(): View
     {
-        return view('videos.manage.create');
+        // Passeseries_id si venen de la vista de sèrie
+        $series = \App\Models\Serie::all();
+        return view('videos.manage.create', compact('series'));
     }
 
-    /**
-     * Desa un nou vídeo a la base de dades.
-     *
-     * @param Request $request
-     * @return RedirectResponse
-     */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
+        $data = $request->validate([
+            'title'       => 'required|string|max:255',
             'description' => 'required|string',
-            'url' => 'required|url',
+            'url'         => 'required|url',
+            'series_id'   => 'nullable|exists:series,id',
         ]);
 
-        Video::create([
-            'title' => $request->input('title'),
-            'description' => $request->input('description'),
-            'url' => $request->input('url'),
-            'user_id' => auth()->id(), // assigna l'id de l'usuari autenticat
+        // Crear el vídeo
+        $video = Video::create([
+            'title'       => $data['title'],
+            'description' => $data['description'],
+            'url'         => $data['url'],
+            'series_id'   => $data['series_id'] ?? null,
+            'user_id'     => auth()->id(),
         ]);
 
-        return redirect()->route('videos.manage.index')->with('success', 'Vídeo creat correctament!');
+        // Dispatch de l'event
+        event(new VideoCreated($video));
+
+        return to_route('videos.manage.index')
+            ->with('success', 'Vídeo creat correctament!');
     }
 
-
-    /**
-     * Mostra un vídeo específic.
-     *
-     * @param int $id
-     * @return View
-     */
-    public function show(int $id): View
+    public function show(Video $video): View
     {
-        $video = Video::findOrFail($id);
-        return view('videos.show', compact('video'));
+        return view('videos.manage.show', compact('video'));
     }
 
-    /**
-     * Mostra el formulari per editar un vídeo existent.
-     *
-     * @param int $id
-     * @return View
-     */
-    public function edit(int $id): View
+    public function edit(Video $video): View
     {
-        $video = Video::findOrFail($id);
-        return view('videos.manage.edit', compact('video'));
+        $series = \App\Models\Serie::all();
+        return view('videos.manage.edit', compact('video', 'series'));
     }
 
-    /**
-     * Actualitza un vídeo existent.
-     *
-     * @param Request $request
-     * @param int $id
-     * @return RedirectResponse
-     */
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(Request $request, Video $video): RedirectResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'url' => 'required|url',
+        $data = $request->validate([
+            'title'       => 'required|string|max:255',
+            'description' => 'required|string',
+            'url'         => 'required|url',
+            'series_id'   => 'nullable|exists:series,id',
         ]);
 
-        $video = Video::findOrFail($id);
-        $video->update($request->only('title', 'description', 'url'));
+        $video->update($data);
 
-        return redirect()->route('videos.manage.index')->with('success', 'Vídeo actualitzat correctament.');
+        return to_route('videos.manage.index')
+            ->with('success', 'Vídeo actualitzat correctament!');
     }
 
-    /**
-     * Mostra la vista de confirmació per eliminar un vídeo.
-     *
-     * @param int $id
-     * @return View
-     */
-    public function delete(int $id): View
+    public function delete(Video $video): View
     {
-        $video = Video::findOrFail($id);
         return view('videos.manage.delete', compact('video'));
     }
 
-    /**
-     * Elimina un vídeo de la base de dades.
-     *
-     * @param int $id
-     * @return RedirectResponse
-     */
-    public function destroy(int $id): RedirectResponse
+    public function destroy(Video $video): RedirectResponse
     {
-        $video = Video::findOrFail($id);
         $video->delete();
 
-        return redirect()->route('videos.manage.index')->with('success', 'Vídeo eliminat correctament.');
+        return to_route('videos.manage.index')
+            ->with('success', 'Vídeo eliminat correctament!');
     }
 
-    /**
-     * Mostra els vídeos testejats per un usuari específic.
-     *
-     * @param int $userId
-     * @return View
-     */
-    public function testedby(int $userId): View
+    public function testedBy(int $userId): View
     {
         $videos = Video::where('tested_by', $userId)->get();
         return view('videos.testedBy', compact('videos'));

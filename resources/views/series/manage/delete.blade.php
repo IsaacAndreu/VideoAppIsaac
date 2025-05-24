@@ -1,22 +1,28 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            Eliminar sèrie
+        <h2 class="text-3xl font-bold text-danger">
+            🗑️ Eliminar sèrie
         </h2>
     </x-slot>
 
-    <div class="py-4 px-6">
-        <p>Estàs segur/a que vols eliminar la sèrie: <strong>{{ $serie->title }}</strong>?</p>
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-white shadow rounded-xl p-6">
+            <p class="text-base text-red-700 font-medium mb-4">
+                ⚠️ Estàs segur/a que vols eliminar la sèrie <strong class="text-lg">{{ $serie->title }}</strong>? Aquesta acció no es pot desfer.
+            </p>
 
-        <form action="{{ route('series.manage.destroy', $serie->id) }}" method="POST" class="mt-4">
-            @csrf
-            @method('DELETE')
+            <form action="{{ route('series.manage.destroy', $serie->id) }}" method="POST" class="flex flex-wrap items-center gap-4">
+                @csrf
+                @method('DELETE')
 
-            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded" data-qa="confirm-delete-series">
-                Sí, eliminar
-            </button>
+                <x-button type="submit" color="red" data-qa="confirm-delete-series">
+                    ✅ Sí, eliminar
+                </x-button>
 
-            <a href="{{ route('series.manage.index') }}" class="ml-4 text-blue-500 hover:underline">Cancel·lar</a>
-        </form>
+                <x-link-button href="{{ route('series.manage.index') }}" color="gray">
+                    ❌ Cancel·lar
+                </x-link-button>
+            </form>
+        </div>
     </div>
 </x-app-layout>

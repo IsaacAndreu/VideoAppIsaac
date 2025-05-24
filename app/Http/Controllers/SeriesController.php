@@ -7,30 +7,26 @@ use Illuminate\View\View;
 
 class SeriesController extends Controller
 {
-    /**
-     * Mostrar totes les sèries disponibles (públic), amb funcionalitat de cerca.
-     */
+    public function __construct()
+    {
+        $this->middleware('can:viewAny,App\Models\Serie')->only('index');
+        $this->middleware('can:view,serie')->only('show');
+    }
+
     public function index(): View
     {
         $search = request('search');
 
         $series = Serie::query()
-            ->when($search, function ($query) use ($search) {
-                $query->where('title', 'like', "%{$search}%");
-            })
-            ->paginate(6); // 6 sèries per pàgina
+            ->when($search, fn($q) => $q->where('title', 'like', "%{$search}%"))
+            ->paginate(6);
 
         return view('series.index', compact('series'));
     }
 
-
-    /**
-     * Mostrar una sèrie concreta amb els seus vídeos associats.
-     */
-    public function show(int $id): View
+    public function show(Serie $serie): View
     {
-        $serie = Serie::with('videos')->findOrFail($id);
-
+        $serie->load('videos');
         return view('series.show', compact('serie'));
     }
 }

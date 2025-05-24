@@ -10,73 +10,61 @@ use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Test;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasProfilePhoto, HasTeams, TwoFactorAuthenticatable, HasRoles;
+    use HasApiTokens;
+    use HasFactory;
+    use HasProfilePhoto;
+    use HasTeams;                 // ✅ Permet treballar amb equips personals (Jetstream)
+    use HasRoles;                // ✅ Permet assignar rols i permisos (Spatie)
+    use Notifiable;
+    use TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-    protected $fillable = ['name', 'email', 'password', 'current_team_id', 'super_admin'];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'super_admin',
+    ];
 
     /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
      */
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'two_factor_recovery_codes',
+        'two_factor_secret',
+    ];
 
     /**
-     * The attributes that should be appended to the model's array form.
+     * The accessors to append to the model's array form.
      *
      * @var array<int, string>
      */
-    protected $appends = ['profile_photo_url'];
+    protected $appends = [
+        'profile_photo_url',
+    ];
 
     /**
-     * Get the URL to the user's profile photo.
+     * The attributes that should be cast.
      *
-     * @return string|null
+     * @return array<string, string>
      */
-    public function getProfilePhotoUrlAttribute(): ?string
+    protected function casts(): array
     {
-        return $this->profile_photo_path
-            ? asset('storage/' . $this->profile_photo_path)
-            : null;
-    }
-
-    /**
-     * Get the team that the user currently belongs to.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function currentTeam()
-    {
-        return $this->belongsTo(Team::class, 'current_team_id');
-    }
-
-    /**
-     * Retorna els tests que ha fet l'usuari.
-     *
-     * @return HasMany
-     */
-    public function testedBy(): HasMany
-    {
-        return $this->hasMany(Test::class, 'user_id');
-    }
-
-    /**
-     * Comprova si l'usuari és super administrador.
-     *
-     * @return bool
-     */
-    public function isSuperAdmin(): bool
-    {
-        return $this->super_admin;
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'super_admin' => 'boolean',
+        ];
     }
 }

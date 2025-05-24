@@ -34,12 +34,14 @@
 
             <!-- Page Content -->
             <main>
-                {{ $slot ?? '' }} {{-- Evitem l'error si $slot no està definit --}}
+                {{ $slot }}
             </main>
         </div>
 
         @stack('modals')
 
         @livewireScripts
+
+        @stack('scripts') {{-- ⬅️ AIXÒ FALTAVA --}}
     </body>
 </html>

@@ -1,32 +1,29 @@
 <x-videos-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
+        <h2 class="text-3xl font-bold text-red-600 leading-tight">
             🗑️ Eliminar usuari
         </h2>
     </x-slot>
 
-    <div class="py-4 px-6">
-        <div class="bg-white shadow rounded p-6">
-            <h1 class="text-2xl font-bold mb-4">Eliminar usuari: {{ $user->name }}</h1>
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-white shadow-xl rounded-lg p-6 space-y-6">
+            <h1 class="text-2xl font-bold text-gray-800">Eliminar usuari: {{ $user->name }}</h1>
 
-            <p class="mb-6 text-red-700">⚠️ Estàs segur/a que vols eliminar aquest usuari? Aquesta acció no es pot desfer.</p>
+            <p class="text-red-600 text-base">
+                ⚠️ Estàs segur/a que vols eliminar aquest usuari? Aquesta acció <strong>no es pot desfer</strong>.
+            </p>
 
-            <form action="{{ route('users.manage.destroy', $user->id) }}" method="POST" class="flex items-center">
+            <form action="{{ route('users.manage.destroy', $user->id) }}" method="POST" class="flex flex-wrap items-center gap-4">
                 @csrf
                 @method('DELETE')
 
-                <button
-                    type="submit"
-                    data-qa="submit-delete-user"
-                    class="bg-red-600 text-black px-4 py-2 rounded hover:bg-red-700"
-                    onclick="return confirm('Realment vols eliminar aquest usuari?')"
-                >
+                <x-button type="submit" color="red" data-qa="submit-delete-user" onclick="return confirm('Realment vols eliminar aquest usuari?')">
                     ✅ Sí, eliminar
-                </button>
+                </x-button>
 
-                <a href="{{ route('users.manage.index') }}" class="ml-6 text-blue-600 hover:underline">
+                <x-link-button href="{{ route('users.manage.index') }}" color="gray">
                     ❌ Cancel·lar
-                </a>
+                </x-link-button>
             </form>
         </div>
     </div>

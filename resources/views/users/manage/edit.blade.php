@@ -1,95 +1,68 @@
 <x-videos-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            ✏️ Editar Usuari
+        {{-- Fixa la “u” de usuari en minúscula perquè el test busqui exactament “✏️ Editar usuari” --}}
+        <h2 class="text-3xl font-bold text-gray-800">
+            ✏️ Editar usuari
         </h2>
     </x-slot>
 
-    <div class="py-4 px-6">
-        <form action="{{ route('users.manage.update', $user->id) }}" method="POST" class="bg-white shadow rounded p-6">
+    <div class="max-w-3xl mx-auto p-6 bg-white shadow-xl rounded-lg space-y-6">
+        <form action="{{ route('users.manage.update', $user->id) }}" method="POST" class="space-y-6">
             @csrf
             @method('PUT')
 
-            <div class="mb-4">
-                <label for="name" class="block font-medium">Nom:</label>
-                <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value="{{ old('name', $user->name) }}"
-                    required
-                    data-qa="user-name"
-                    class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                >
+            <div>
+                <label for="name" class="block font-semibold">Nom:</label>
+                <input type="text" id="name" name="name"
+                       value="{{ old('name', $user->name) }}"
+                       required class="mt-1 w-full px-4 py-2 border rounded-md" />
             </div>
 
-            <div class="mb-4">
-                <label for="email" class="block font-medium">Email:</label>
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value="{{ old('email', $user->email) }}"
-                    required
-                    data-qa="user-email"
-                    class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                >
+            <div>
+                <label for="email" class="block font-semibold">Email:</label>
+                <input type="email" id="email" name="email"
+                       value="{{ old('email', $user->email) }}"
+                       required class="mt-1 w-full px-4 py-2 border rounded-md" />
             </div>
 
-            <div class="mb-4">
-                <label for="password" class="block font-medium">Contrasenya (opcional):</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    data-qa="user-password"
-                    class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                >
+            <div>
+                <label for="password" class="block font-semibold">Contrasenya (opcional):</label>
+                <input type="password" id="password" name="password"
+                       class="mt-1 w-full px-4 py-2 border rounded-md" />
             </div>
 
-            <div class="mb-4">
-                <label for="role" class="block font-medium">Rol:</label>
-                <select
-                    id="role"
-                    name="role"
-                    data-qa="user-role"
-                    class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                >
-                    <option value="superadmin" @if($user->role === 'superadmin') selected @endif>Superadmin</option>
-                    <option value="regular" @if($user->role === 'regular') selected @endif>Regular</option>
-                    <option value="videomanager" @if($user->role === 'videomanager') selected @endif>Videomanager</option>
+            <div>
+                <label for="role" class="block font-semibold">Rol:</label>
+                <select id="role" name="role" required class="mt-1 w-full px-4 py-2 border rounded-md">
+                    <option value="super-admin"    {{ $user->hasRole('super-admin')    ? 'selected' : '' }}>Super-admin</option>
+                    <option value="regular-user"   {{ $user->hasRole('regular-user')   ? 'selected' : '' }}>Regular</option>
+                    <option value="video-manager"  {{ $user->hasRole('video-manager')  ? 'selected' : '' }}>Videomanager</option>
                 </select>
             </div>
 
-            <div class="mb-4">
-                <label class="block font-medium mb-2">Permisos:</label>
+            @php
+                $userPermissions = $user->getPermissionNames()->toArray();
+            @endphp
+            <div>
+                <label class="block font-semibold mb-2">Permisos:</label>
                 <div class="space-y-2">
-                    @foreach (\App\Helpers\UserPermissionsHelper::getAllPermissions() as $permission)
-                        <div>
-                            <label class="inline-flex items-center">
-                                <input
-                                    type="checkbox"
-                                    name="permissions[]"
-                                    value="{{ $permission }}"
-                                    @if(in_array($permission, $user->permissions ?? [])) checked @endif
-                                    data-qa="user-permission-{{ $permission }}"
-                                    class="rounded border-gray-300"
-                                >
-                                <span class="ml-2">{{ $permission }}</span>
-                            </label>
-                        </div>
+                    @foreach(\App\Helpers\UserPermissionsHelper::getAllPermissions() as $permission)
+                        <label class="inline-flex items-center">
+                            <input
+                                type="checkbox"
+                                name="permissions[]"
+                                value="{{ $permission }}"
+                                {{ in_array($permission, $userPermissions) ? 'checked' : '' }}
+                                class="rounded border-gray-300"
+                            />
+                            <span class="ml-2">{{ $permission }}</span>
+                        </label>
                     @endforeach
                 </div>
             </div>
 
             <div class="flex justify-end">
-                <button
-                    type="submit"
-                    data-qa="submit-edit-user"
-                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                    💾 Actualitzar
-                </button>
+                <x-button type="submit">💾 Actualitzar</x-button>
             </div>
         </form>
     </div>

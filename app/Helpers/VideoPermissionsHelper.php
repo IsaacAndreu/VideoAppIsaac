@@ -47,9 +47,10 @@ class VideoPermissionsHelper
         Role::firstOrCreate(['name' => 'video-manager', 'guard_name' => 'web']);
         Role::firstOrCreate(['name' => 'regular-user', 'guard_name' => 'web']);
 
-        // Assignar permisos després de crear-los
+        // Assignar permisos al rol super-admin
         Role::findByName('super-admin', 'web')->syncPermissions($permissions);
 
+        // Assignar permisos al rol video-manager
         Role::findByName('video-manager', 'web')->syncPermissions([
             'view videos',
             'create videos',
@@ -58,9 +59,10 @@ class VideoPermissionsHelper
             'manage videos',
         ]);
 
+        // Assignar permisos al rol regular-user
         Role::findByName('regular-user', 'web')->syncPermissions([
             'view videos',
+            'view series',
         ]);
     }
 }
-

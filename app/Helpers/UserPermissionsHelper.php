@@ -8,22 +8,59 @@ use Spatie\Permission\Models\Role;
 class UserPermissionsHelper
 {
     /**
-     * Crea i assigna el permís de "manage users" al rol super-admin.
+     * Seed dels permisos per a usuaris, sèries i vídeos,
+     * i assignació de tots ells al rol super-admin.
      *
      * @return void
      */
-    public static function createAndAssignUserPermissions(): void
+    public static function seedDefaultPermissions(): void
     {
-        // 1. Defineix el permís per a la gestió dels usuaris
-        $manageUsersPermission = Permission::firstOrCreate([
-            'name' => 'manage users',
+        $permissions = [
+            // Sèries
+            'view series',
+            'create series',
+            'edit series',
+            'delete series',
+            'manage series',
+            // Vídeos
+            'view videos',
+            'create videos',
+            'edit videos',
+            'delete videos',
+            'manage videos',
+            // Usuaris
+            'view users',
+            'create users',
+            'edit users',
+            'delete users',
+            'manage users',
+        ];
+
+        // 1. Crear tots els permisos si no existeixen
+        foreach ($permissions as $name) {
+            Permission::firstOrCreate([
+                'name'       => $name,
+                'guard_name' => 'web',
+            ]);
+        }
+
+        // 2. Obtenir o crear el rol super-admin
+        $superAdmin = Role::firstOrCreate([
+            'name'       => 'super-admin',
             'guard_name' => 'web',
         ]);
 
-        // 2. Obté el rol super-admin
-        $superAdminRole = Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => 'web']);
+        // 3. Assignar-li TOTS els permisos
+        $superAdmin->syncPermissions($permissions);
+    }
 
-        // 3. Assigna el permís de "manage users" només al rol super-admin
-        $superAdminRole->givePermissionTo($manageUsersPermission);
+    /**
+     * Retorna la llista de tots els noms de permisos disponibles.
+     *
+     * @return string[]
+     */
+    public static function getAllPermissions(): array
+    {
+        return Permission::pluck('name')->toArray();
     }
 }
